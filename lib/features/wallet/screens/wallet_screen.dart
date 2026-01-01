@@ -116,21 +116,22 @@ class WalletPage extends StatelessWidget {
         _actionBtn(ImageConstants.deposit, "Deposit", isPrimary: true),
         SizedBox(width: r.w(10)),
 
+        _actionBtn(ImageConstants.withdraw, "Withdraw"),
+        SizedBox(width: r.w(10)),
+
         Expanded(
           child: GestureDetector(
             onTap: () {
               showTransferBottomSheet(context, r);
             },
             child: _actionBtn(
-              ImageConstants.withdraw,
-              "Withdraw",
+              ImageConstants.transfer,
+              "Transfer",
               isExpandedInternal: true,
             ),
           ),
         ),
-
-        SizedBox(width: r.w(10)),
-        _actionBtn(ImageConstants.transfer, "Transfer"),
+        // _actionBtn(ImageConstants.transfer, "Transfer"),
       ],
     );
   }
