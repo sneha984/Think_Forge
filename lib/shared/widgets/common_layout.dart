@@ -49,7 +49,7 @@ class CommonLayout extends StatelessWidget {
       borderRadius: BorderRadius.circular(r.w(8)),
       child: CachedNetworkImage(
         imageUrl:
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoxMUc_2D0YRzfmsaVQb5aE3pfTFXRowyngA&s",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjcoePJ2H1IVmvBB0s_BSRJ8HTDKWpVO-lZA&s",
         width: r.w(36),
         height: r.w(36),
         fit: BoxFit.cover,
