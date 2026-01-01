@@ -28,7 +28,10 @@ class WalletPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: r.h(26)),
+            SizedBox(height: r.h(20)),
+            _accountDropdown(r, "MT51i92"),
+            SizedBox(height: r.h(15)),
+
             _buildBalanceSection(),
             SizedBox(height: r.h(20)),
             _buildActionButtons(context),
@@ -110,6 +113,169 @@ class WalletPage extends StatelessWidget {
     );
   }
 
+  void showTransactionReceipt(
+    BuildContext context,
+    TransactionModel txn,
+    Responsive r,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: r.w(20),
+              vertical: r.h(25),
+            ),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1D1D1F), // Dark card color
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(r.w(32)),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(ImageConstants.success),
+
+                SizedBox(height: r.h(15)),
+                Text(
+                  txn.title,
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: r.sp(18),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: r.h(25)),
+
+                // 🔹 Details Container
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(r.w(16)),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(r.w(16)),
+                  ),
+                  child: _receiptRow(
+                    "To",
+                    "Wallet (HDFC - 5375 **** **** 8544)",
+                    r,
+                  ),
+                ),
+                SizedBox(height: r.h(7)),
+
+                _receiptInfoSection(r, [
+                  _receiptRow("From", "Axis Bank - 5375 **** **** 2368", r),
+                  _receiptRow("Txn Id", "TXN-9F7A2C1E-20250919", r),
+                  _receiptRow("Note", "Investment funding", r),
+                  _receiptRow(
+                    "Status",
+                    txn.status,
+                    r,
+                    statusColor:
+                        txn.status == "Rejected" ? Colors.red : Colors.green,
+                  ),
+                  _receiptRow("Time and Date", txn.formattedDate, r),
+                ]),
+
+                SizedBox(height: r.h(20)),
+
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(r.w(16)),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(r.w(16)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Total",
+                        style: GoogleFonts.inter(
+                          color: Colors.grey,
+                          fontSize: r.sp(12),
+                        ),
+                      ),
+                      Text(
+                        txn.amount.replaceAll('+', '').replaceAll('-', ''),
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: r.sp(30),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: r.h(20)),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      padding: EdgeInsets.symmetric(vertical: r.h(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      "Continue",
+                      style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                SizedBox(height: r.h(20)),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _receiptRow(
+    String label,
+    String value,
+    Responsive r, {
+    Color? statusColor,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: r.h(6)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              color: Colors.grey[600],
+              fontSize: r.sp(12),
+            ),
+          ),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: GoogleFonts.inter(
+                color: statusColor ?? Colors.white,
+                fontSize: r.sp(12),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildActionButtons(BuildContext context) {
     return Row(
       children: [
@@ -133,6 +299,17 @@ class WalletPage extends StatelessWidget {
         ),
         // _actionBtn(ImageConstants.transfer, "Transfer"),
       ],
+    );
+  }
+
+  Widget _receiptInfoSection(Responsive r, List<Widget> children) {
+    return Container(
+      padding: EdgeInsets.all(r.w(16)),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(r.w(16)),
+      ),
+      child: Column(children: children),
     );
   }
 
@@ -183,6 +360,62 @@ class WalletPage extends StatelessWidget {
         SizedBox(width: r.w(7)),
         const Icon(Icons.more_horiz, color: Colors.white),
       ],
+    );
+  }
+
+  Widget _accountDropdown(Responsive r, String accountId) {
+    return PopupMenuButton<String>(
+      padding: EdgeInsets.zero,
+      offset: const Offset(0, 40), // Positions the menu below the button
+      color: const Color(0xFF1D1D1F), // Dark menu background
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      // 🔹 The "Button" UI from your image
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: r.w(12), vertical: r.h(6)),
+        decoration: BoxDecoration(
+          color: const Color(0xFF262626), // The specific grey from your image
+          borderRadius: BorderRadius.circular(r.w(8)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              accountId,
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontSize: r.sp(12).clamp(12.0, 16.0),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(width: r.w(4)),
+            Icon(
+              Icons.keyboard_arrow_down,
+              color: Colors.white.withOpacity(0.5),
+              size: r.w(16).clamp(16.0, 22.0),
+            ),
+          ],
+        ),
+      ),
+      // 🔹 The actual list items
+      itemBuilder:
+          (context) => [
+            _buildPopupItem(r, "MT51i92"),
+            _buildPopupItem(r, "MT51i95"),
+            _buildPopupItem(r, "MT51i99"),
+          ],
+      onSelected: (value) {
+        // Handle your logic here
+      },
+    );
+  }
+
+  PopupMenuItem<String> _buildPopupItem(Responsive r, String value) {
+    return PopupMenuItem<String>(
+      value: value,
+      child: Text(
+        value,
+        style: GoogleFonts.inter(color: Colors.white, fontSize: r.sp(13)),
+      ),
     );
   }
 
@@ -487,7 +720,7 @@ class WalletPage extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: transactions.length > 5 ? 5 : transactions.length,
             itemBuilder: (context, index) {
-              return _txnTile(transactions[index]);
+              return _txnTile(transactions[index], context);
             },
           ),
 
@@ -526,92 +759,98 @@ class WalletPage extends StatelessWidget {
     );
   }
 
-  Widget _txnTile(TransactionModel txn) {
+  Widget _txnTile(TransactionModel txn, BuildContext context) {
     bool isRejected = txn.status.toLowerCase() == "rejected";
 
-    return Container(
-      margin: EdgeInsets.only(bottom: r.h(8)),
-      padding: EdgeInsets.symmetric(horizontal: r.w(8), vertical: r.h(11)),
-      decoration: BoxDecoration(
-        color: const Color(0xFF161616),
-        borderRadius: BorderRadius.circular(r.w(16)),
-        border: Border.all(color: Colors.white.withOpacity(0.05), width: 1),
-      ),
-      child: Row(
-        children: [
-          Container(
-            height: r.w(40),
-            width: r.w(40),
-            padding: EdgeInsets.all(r.w(10)),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: txn.gradientColors,
+    return GestureDetector(
+      onTap: () {
+        showTransactionReceipt(context, txn, r);
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: r.h(8)),
+        padding: EdgeInsets.symmetric(horizontal: r.w(8), vertical: r.h(11)),
+        decoration: BoxDecoration(
+          color: const Color(0xFF161616),
+          borderRadius: BorderRadius.circular(r.w(16)),
+          border: Border.all(color: Colors.white.withOpacity(0.05), width: 1),
+        ),
+        child: Row(
+          children: [
+            Container(
+              height: r.w(40),
+              width: r.w(40),
+              padding: EdgeInsets.all(r.w(10)),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: txn.gradientColors,
+                ),
+              ),
+              child: SvgPicture.asset(
+                (txn.title == "Wallet deposit" ||
+                        txn.title == "Wallet Withdraw")
+                    ? ImageConstants.walletIcon
+                    : txn.title == "Referral"
+                    ? ImageConstants.referralcon
+                    : ImageConstants.bonusIcon,
+                colorFilter: const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
-            child: SvgPicture.asset(
-              (txn.title == "Wallet deposit" || txn.title == "Wallet Withdraw")
-                  ? ImageConstants.walletIcon
-                  : txn.title == "Referral"
-                  ? ImageConstants.referralcon
-                  : ImageConstants.bonusIcon,
-              colorFilter: const ColorFilter.mode(
-                Colors.white,
-                BlendMode.srcIn,
+            SizedBox(width: r.w(12)),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    txn.title,
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      fontSize: r.sp(12.4),
+                    ),
+                  ),
+                  Text(
+                    txn.formattedDate,
+                    style: GoogleFonts.inter(
+                      color: Colors.grey[600],
+                      fontSize: r.sp(9),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          SizedBox(width: r.w(12)),
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  txn.title,
-                  style: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                    fontSize: r.sp(12.4),
-                  ),
-                ),
-                Text(
-                  txn.formattedDate,
-                  style: GoogleFonts.inter(
-                    color: Colors.grey[600],
-                    fontSize: r.sp(9),
-                  ),
-                ),
-              ],
+            Text(
+              txn.status,
+              style: GoogleFonts.inter(
+                color: isRejected ? const Color(0xFFFF4B4B) : Colors.white70,
+                fontSize: r.sp(11.2),
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
+            SizedBox(width: r.w(14)),
 
-          Text(
-            txn.status,
-            style: GoogleFonts.inter(
-              color: isRejected ? const Color(0xFFFF4B4B) : Colors.white70,
-              fontSize: r.sp(11.2),
-              fontWeight: FontWeight.w500,
+            Text(
+              txn.amount,
+              style: GoogleFonts.inter(
+                color:
+                    isRejected
+                        ? Colors.white.withOpacity(0.4)
+                        : (txn.amount.contains('+')
+                            ? const Color(0xFF26E07F)
+                            : Colors.white),
+                fontWeight: FontWeight.w500,
+                fontSize: r.sp(13),
+              ),
             ),
-          ),
-          SizedBox(width: r.w(14)),
-
-          Text(
-            txn.amount,
-            style: GoogleFonts.inter(
-              color:
-                  isRejected
-                      ? Colors.white.withOpacity(0.4)
-                      : (txn.amount.contains('+')
-                          ? const Color(0xFF26E07F)
-                          : Colors.white),
-              fontWeight: FontWeight.w500,
-              fontSize: r.sp(13),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
